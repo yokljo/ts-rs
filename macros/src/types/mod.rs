@@ -49,7 +49,7 @@ pub(crate) fn r#enum(s: &ItemEnum) -> Result<DerivedTS> {
 
     Ok(DerivedTS {
         inline: quote!(vec![#(#formatted_variants),*].join(" | ")),
-        decl: quote!(format!("type {} = {};", #name, Self::inline(0))),
+        decl: quote!(format!("type {} = {};", #name, Self::inline())),
         inline_flattened: None,
         dependencies: quote! {
             let mut dependencies = vec![];
@@ -104,13 +104,12 @@ fn format_variant(
         false => match &enum_attr.tag {
             Some(tag) => match &enum_attr.content {
                 Some(content) => {
-                    quote!(format!("{{{}: \"{}\", {}: {}}}", #tag, #name, #content, #inline_type))
+                    quote!(format!("{{ {}: \"{}\"; {}: {}; }}", #tag, #name, #content, #inline_type))
                 }
                 None => match derived_type.inline_flattened {
                     Some(inline_flattened) => quote! {
                         format!(
-                            "{{\n{}{}: \"{}\",\n{}\n}}",
-                            " ".repeat((indent + 1) * 4),
+                            "{{ {}: \"{}\"; {} }}",
                             #tag,
                             #name,
                             #inline_flattened
@@ -120,8 +119,7 @@ fn format_variant(
                         dependencies.push(quote!(dependencies.append(&mut #derived_dependencies);));
                         quote! {
                             format!(
-                                "\n{}{{ {}: \"{}\" }} & {}",
-                                " ".repeat((indent + 1) * 4),
+                                "{{ {}: \"{}\"; }} & {}",
                                 #tag,
                                 #name,
                                 #inline_type

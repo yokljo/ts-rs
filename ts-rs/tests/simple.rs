@@ -14,29 +14,15 @@ struct Simple {
 #[test]
 fn test_def() {
     assert_eq!(
-        Simple::inline(0),
-        "\
-{
-    a: number,
-    b: string,
-    c: [number, string, number],
-    d: string[],
-    e: string | null,
-}"
+        Simple::inline(),
+        "{ a: number; b: string; c: [number, string, number]; d: string[]; e: string | null; }"
     )
 }
 
 #[test]
 fn test_indented() {
     assert_eq!(
-        Simple::inline(1),
-        "\
-{
-        a: number,
-        b: string,
-        c: [number, string, number],
-        d: string[],
-        e: string | null,
-    }"
+        Simple::inline(),
+        "{ a: number; b: string; c: [number, string, number]; d: string[]; e: string | null; }"
     )
 }

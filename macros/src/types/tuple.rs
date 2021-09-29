@@ -31,7 +31,7 @@ pub(crate) fn tuple(
             format!(
                 "type {} = {};",
                 #name,
-                Self::inline(0)
+                Self::inline()
             )
         },
         inline_flattened: None,
@@ -74,7 +74,7 @@ fn format_field(
 
     formatted_fields.push(match &type_override {
         Some(o) => quote!(#o.to_owned()),
-        None if inline => quote!(<#ty as ts_rs::TS>::inline(0)),
+        None if inline => quote!(<#ty as ts_rs::TS>::inline()),
         None => quote!(<#ty as ts_rs::TS>::name()),
     });
 

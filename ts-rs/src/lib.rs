@@ -119,13 +119,13 @@ pub trait TS: 'static {
 
     /// Formats this types definition in TypeScript, e.g `{ user_id: number }`.
     /// This function will panic if the type cannot be inlined.
-    fn inline(#[allow(unused_variables)] indent: usize) -> String {
+    fn inline() -> String {
         panic!("{} cannot be inlined", Self::name());
     }
 
     /// Flatten an type declaration.  
     /// This function will panic if the type cannot be flattened.
-    fn inline_flattened(#[allow(unused_variables)] indent: usize) -> String {
+    fn inline_flattened() -> String {
         panic!("{} cannot be flattened", Self::name())
     }
 
@@ -163,7 +163,7 @@ macro_rules! impl_primitives {
             fn name() -> String {
                 $l.to_owned()
             }
-            fn inline(_: usize) -> String {
+            fn inline() -> String {
                 $l.to_owned()
             }
             fn dependencies() -> Vec<(TypeId, String)> {
@@ -185,11 +185,11 @@ macro_rules! impl_tuples {
                     vec![$($i::name()),*].join(", ")
                 )
             }
-            fn inline(indent: usize) -> String {
+            fn inline() -> String {
                 format!(
                     "[{}]",
                     vec![
-                        $($i::inline(indent)),*
+                        $($i::inline()),*
                     ].join(", ")
                 )
             }
@@ -214,11 +214,11 @@ macro_rules! impl_proxy {
             fn name() -> String {
                 T::name()
             }
-            fn inline(indent: usize) -> String {
-                T::inline(indent)
+            fn inline() -> String {
+                T::inline()
             }
-            fn inline_flattened(indent: usize) -> String {
-                T::inline_flattened(indent)
+            fn inline_flattened() -> String {
+                T::inline_flattened()
             }
             fn dependencies() -> Vec<(TypeId, String)> {
                 T::dependencies()
@@ -261,8 +261,8 @@ impl<T: TS> TS for Option<T> {
         format!("{} | null", T::name())
     }
 
-    fn inline(indent: usize) -> String {
-        format!("{} | null", T::inline(indent))
+    fn inline() -> String {
+        format!("{} | null", T::inline())
     }
 
     fn dependencies() -> Vec<(TypeId, String)> {
@@ -279,8 +279,8 @@ impl<T: TS> TS for Vec<T> {
         format!("{}[]", T::name())
     }
 
-    fn inline(indent: usize) -> String {
-        format!("{}[]", T::inline(indent))
+    fn inline() -> String {
+        format!("{}[]", T::inline())
     }
 
     fn dependencies() -> Vec<(TypeId, String)> {
@@ -297,8 +297,8 @@ impl<T: TS> TS for HashSet<T> {
         format!("{}[]", T::name())
     }
 
-    fn inline(indent: usize) -> String {
-        format!("{}[]", T::inline(indent))
+    fn inline() -> String {
+        format!("{}[]", T::inline())
     }
 
     fn dependencies() -> Vec<(TypeId, String)> {
@@ -315,8 +315,8 @@ impl<T: TS> TS for BTreeSet<T> {
         format!("{}[]", T::name())
     }
 
-    fn inline(indent: usize) -> String {
-        format!("{}[]", T::inline(indent))
+    fn inline() -> String {
+        format!("{}[]", T::inline())
     }
 
     fn dependencies() -> Vec<(TypeId, String)> {
@@ -333,8 +333,8 @@ impl<K: TS, V: TS> TS for HashMap<K, V> {
         format!("{{ [key: {}]: {} }}", K::name(), V::name())
     }
 
-    fn inline(indent: usize) -> String {
-        format!("{{ [key: {}]: {} }}", K::inline(indent), V::inline(indent))
+    fn inline() -> String {
+        format!("{{ [key: {}]: {} }}", K::inline(), V::inline())
     }
 
     fn dependencies() -> Vec<(TypeId, String)> {
@@ -354,8 +354,8 @@ impl<K: TS, V: TS> TS for BTreeMap<K, V> {
         format!("{{ [key: {}]: {} }}", K::name(), V::name())
     }
 
-    fn inline(indent: usize) -> String {
-        format!("{{ [key: {}]: {} }}", K::inline(indent), V::inline(indent))
+    fn inline() -> String {
+        format!("{{ [key: {}]: {} }}", K::inline(), V::inline())
     }
 
     fn dependencies() -> Vec<(TypeId, String)> {

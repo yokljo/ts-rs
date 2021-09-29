@@ -16,17 +16,16 @@ pub(crate) fn named(
         format_field(&mut formatted_fields, &mut dependencies, field, rename_all)?;
     }
 
-    let fields = quote!(vec![#(#formatted_fields),*].join("\n"));
+    let fields = quote!(vec![#(#formatted_fields),*].join(" "));
 
     Ok(DerivedTS {
         inline: quote! {
             format!(
-                "{{\n{}\n{}}}",
+                "{{ {} }}",
                 #fields,
-                " ".repeat(indent * 4)
             )
         },
-        decl: quote!(format!("interface {} {}", #name, Self::inline(0))),
+        decl: quote!(format!("interface {} {}", #name, Self::inline())),
         inline_flattened: Some(fields),
         name: name.to_owned(),
         dependencies: quote! {
@@ -70,7 +69,7 @@ fn format_field(
             _ => {}
         }
 
-        formatted_fields.push(quote!(<#ty as ts_rs::TS>::inline_flattened(indent)));
+        formatted_fields.push(quote!(<#ty as ts_rs::TS>::inline_flattened()));
         dependencies.push(quote!(dependencies.append(&mut <#ty as ts_rs::TS>::dependencies());));
         return Ok(());
     }
@@ -91,7 +90,7 @@ fn format_field(
     let formatted_ty = type_override
         .map(|t| quote!(#t))
         .unwrap_or_else(|| match inline {
-            true => quote!(<#ty as ts_rs::TS>::inline(indent + 1)),
+            true => quote!(<#ty as ts_rs::TS>::inline()),
             false => quote!(<#ty as ts_rs::TS>::name()),
         });
     let name = match (rename, rename_all) {
@@ -101,7 +100,7 @@ fn format_field(
     };
 
     formatted_fields.push(quote! {
-        format!("{}{}{}: {},", " ".repeat((indent + 1) * 4), #name, #optional_annotation, #formatted_ty)
+        format!("{}{}: {};", #name, #optional_annotation, #formatted_ty)
     });
 
     Ok(())

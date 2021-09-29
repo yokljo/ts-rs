@@ -33,7 +33,7 @@ pub(crate) fn newtype(
     let inner_ty = &inner.ty;
     let inline_def = match &type_override {
         Some(o) => quote!(#o),
-        None if inline => quote!(<#inner_ty as ts_rs::TS>::inline(0)),
+        None if inline => quote!(<#inner_ty as ts_rs::TS>::inline()),
         None => quote!(<#inner_ty as ts_rs::TS>::name()),
     };
     Ok(DerivedTS {

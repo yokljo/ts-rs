@@ -31,7 +31,7 @@ impl DerivedTS {
         let inline_flattened = inline_flattened
             .map(|t| {
                 quote! {
-                    fn inline_flattened(indent: usize) -> String {
+                    fn inline_flattened() -> String {
                         #t
                     }
                 }
@@ -46,7 +46,7 @@ impl DerivedTS {
                 fn name() -> String {
                     #name.to_owned()
                 }
-                fn inline(indent: usize) -> String {
+                fn inline() -> String {
                     #inline
                 }
                 #inline_flattened
