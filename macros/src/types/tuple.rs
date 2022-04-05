@@ -49,6 +49,7 @@ pub(crate) fn tuple(
         dependencies,
         export: attr.export,
         export_to: attr.export_to.clone(),
+        bound: attr.bound.clone(),
     })
 }
 

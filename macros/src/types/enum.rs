@@ -31,6 +31,7 @@ pub(crate) fn r#enum_def(s: &ItemEnum) -> syn::Result<DerivedTS> {
             dependencies: Dependencies::default(),
             export: enum_attr.export,
             export_to: enum_attr.export_to,
+            bound: enum_attr.bound,
         });
     }
 
@@ -55,6 +56,7 @@ pub(crate) fn r#enum_def(s: &ItemEnum) -> syn::Result<DerivedTS> {
         name,
         export: enum_attr.export,
         export_to: enum_attr.export_to,
+        bound: enum_attr.bound,
     })
 }
 
@@ -150,5 +152,6 @@ fn empty_enum(name: impl Into<String>, enum_attr: EnumAttr) -> DerivedTS {
         dependencies: Dependencies::default(),
         export: enum_attr.export,
         export_to: enum_attr.export_to,
+        bound: enum_attr.bound,
     }
 }

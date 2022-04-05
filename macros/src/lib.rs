@@ -5,7 +5,7 @@ use proc_macro2::{Ident, TokenStream};
 use quote::{format_ident, quote};
 use syn::{
     parse_quote, spanned::Spanned, ConstParam, GenericParam, Generics, Item, LifetimeDef, Result,
-    TypeParam, WhereClause,
+    TypeParam, WhereClause, LitStr,
 };
 
 use crate::deps::Dependencies;
@@ -25,6 +25,7 @@ struct DerivedTS {
 
     export: bool,
     export_to: Option<String>,
+    bound: Option<LitStr>,
 }
 
 impl DerivedTS {
@@ -46,7 +47,7 @@ impl DerivedTS {
         })
     }
 
-    fn into_impl(self, rust_ty: Ident, generics: Generics) -> TokenStream {
+    fn into_impl(self, rust_ty: Ident, generics: Generics) -> Result<TokenStream> {
         let export_to = match &self.export_to {
             Some(dirname) if dirname.ends_with('/') => {
                 format!("{}{}.ts", dirname, self.name)
@@ -80,8 +81,8 @@ impl DerivedTS {
             })
             .unwrap_or_else(TokenStream::new);
 
-        let impl_start = generate_impl(&rust_ty, &generics);
-        quote! {
+        let impl_start = generate_impl(&rust_ty, &generics, &self.bound)?;
+        Ok(quote! {
             #impl_start {
                 const EXPORT_TO: Option<&'static str> = Some(#export_to);
 
@@ -104,12 +105,12 @@ impl DerivedTS {
             }
 
             #export
-        }
+        })
     }
 }
 
 // generate start of the `impl TS for #ty` block, up to (excluding) the open brace
-fn generate_impl(ty: &Ident, generics: &Generics) -> TokenStream {
+fn generate_impl(ty: &Ident, generics: &Generics, bound: &Option<LitStr>) -> Result<TokenStream> {
     use GenericParam::*;
 
     let bounds = generics.params.iter().map(|param| match param {
@@ -138,29 +139,35 @@ fn generate_impl(ty: &Ident, generics: &Generics) -> TokenStream {
         Lifetime(LifetimeDef { lifetime, .. }) => quote!(#lifetime),
     });
 
-    let where_bound = add_ts_to_where_clause(generics);
-    quote!(impl <#(#bounds),*> ts_rs::TS for #ty <#(#type_args),*> #where_bound)
+    let where_bound = add_ts_to_where_clause(generics, bound)?;
+    Ok(quote!(impl <#(#bounds),*> ts_rs::TS for #ty <#(#type_args),*> #where_bound))
 }
 
-fn add_ts_to_where_clause(generics: &Generics) -> Option<WhereClause> {
-    let generic_types = generics
-        .params
-        .iter()
-        .filter_map(|gp| match gp {
-            GenericParam::Type(ty) => Some(ty.ident.clone()),
-            _ => None,
-        })
-        .collect::<Vec<_>>();
-    if generic_types.is_empty() {
-        return generics.where_clause.clone();
-    }
-    match generics.where_clause {
-        None => Some(parse_quote! { where #( #generic_types : ts_rs::TS ),* }),
+fn add_ts_to_where_clause(generics: &Generics, bound: &Option<LitStr>) -> Result<Option<WhereClause>> {
+    let extra_bounds = if let Some(bound) = bound {
+        let bound_stream: TokenStream = bound.value().parse()
+            .map_err(|e| syn::Error::new(bound.span(), format!("{:?}", e)))?;
+        bound_stream
+    } else {
+        let generic_types = generics
+            .params
+            .iter()
+            .filter_map(|gp| match gp {
+                GenericParam::Type(ty) => Some(ty.ident.clone()),
+                _ => None,
+            })
+            .collect::<Vec<_>>();
+
+        parse_quote! { #( #generic_types : ts_rs::TS ),* }
+    };
+
+    Ok(match generics.where_clause {
+        None => Some(parse_quote! { where #extra_bounds }),
         Some(ref w) => {
             let bounds = w.predicates.iter();
-            Some(parse_quote! { where #(#bounds,)* #( #generic_types : ts_rs::TS ),* })
+            Some(parse_quote! { where #(#bounds,)* #extra_bounds })
         }
-    }
+    })
 }
 
 /// Derives [TS](./trait.TS.html) for a struct or enum.
@@ -182,5 +189,5 @@ fn entry(input: proc_macro::TokenStream) -> Result<TokenStream> {
         _ => syn_err!(input.span(); "unsupported item"),
     };
 
-    Ok(ts.into_impl(ident, generics))
+    ts.into_impl(ident, generics)
 }

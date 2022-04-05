@@ -51,6 +51,7 @@ pub(crate) fn named(
         dependencies,
         export: attr.export,
         export_to: attr.export_to.clone(),
+        bound: attr.bound.clone(),
     })
 }
 

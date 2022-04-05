@@ -169,7 +169,29 @@ mod export;
 /// - `#[ts(rename_all = "..")]`:  
 ///   Rename all fields/variants of the type.
 ///   Valid values are `lowercase`, `UPPERCASE`, `camelCase`, `snake_case`, `PascalCase`, `SCREAMING_SNAKE_CASE`
+/// 
+/// - `#[ts(bound = "..")]`
+///   Override the automatically generated generic bounds with the specified bounds. For example, this struct:
+/// 
+///   ```no_run
+///   #[derive(TS)]
+///   struct GameData<G: Game> {
+///       thing: G::Thing,
+///   }
+///   ```
 ///
+///   on top of requiring that `G: Game`, will also require that `G: TS` in the implementation of the
+///   `TS` trait. However, if you write this:
+/// 
+///   ```no_run
+///   #[derive(TS)]
+///   #[ts(bound = "G: Debug")]
+///   struct GameData<G: Game> {
+///       thing: G::Thing,
+///   }
+///   ```
+/// 
+///   then the `TS` trait implementation will not require `G: TS`, but instead it will require `G: Debug`.
 ///
 /// ### struct field attributes
 ///

@@ -5,7 +5,7 @@ pub use r#enum::*;
 pub use r#struct::*;
 use syn::{
     parse::{Parse, ParseStream},
-    Error, Lit, Result, Token,
+    Error, Lit, Result, Token, LitStr,
 };
 
 mod r#enum;
@@ -53,12 +53,16 @@ impl TryFrom<String> for Inflection {
     }
 }
 
-fn parse_assign_str(input: ParseStream) -> Result<String> {
+fn parse_assign_lit_str(input: ParseStream) -> Result<LitStr> {
     input.parse::<Token![=]>()?;
     match Lit::parse(input)? {
-        Lit::Str(string) => Ok(string.value()),
+        Lit::Str(string) => Ok(string),
         other => Err(Error::new(other.span(), "expected string")),
     }
+}
+
+fn parse_assign_str(input: ParseStream) -> Result<String> {
+    parse_assign_lit_str(input).map(|s| s.value())
 }
 
 fn parse_assign_inflection(input: ParseStream) -> Result<Inflection> {
