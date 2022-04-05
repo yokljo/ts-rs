@@ -11,6 +11,7 @@ pub struct EnumAttr {
     pub rename: Option<String>,
     pub export_to: Option<String>,
     pub export: bool,
+    pub ignore_generics: bool,
     pub bound: Option<LitStr>,
     tag: Option<String>,
     untagged: bool,
@@ -60,6 +61,7 @@ impl EnumAttr {
             untagged,
             export_to,
             export,
+            ignore_generics,
             bound,
         }: EnumAttr,
     ) {
@@ -70,6 +72,7 @@ impl EnumAttr {
         self.content = self.content.take().or(content);
         self.export = self.export || export;
         self.export_to = self.export_to.take().or(export_to);
+        self.ignore_generics = self.ignore_generics || ignore_generics;
         self.bound = self.bound.take().or(bound);
     }
 }
@@ -80,6 +83,7 @@ impl_parse! {
         "rename_all" => out.rename_all = Some(parse_assign_inflection(input)?),
         "export_to" => out.export_to = Some(parse_assign_str(input)?),
         "export" => out.export = true,
+        "ignore_generics" => out.ignore_generics = true,
         "bound" => out.bound = Some(parse_assign_lit_str(input)?),
     }
 }

@@ -192,6 +192,9 @@ mod export;
 ///   ```
 /// 
 ///   then the `TS` trait implementation will not require `G: TS`, but instead it will require `G: Debug`.
+/// 
+/// - `#[ts(ignore_generics)]`
+///   The generated type will not have generic arguments.
 ///
 /// ### struct field attributes
 ///

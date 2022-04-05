@@ -13,6 +13,7 @@ pub struct StructAttr {
     pub rename: Option<String>,
     pub export_to: Option<String>,
     pub export: bool,
+    pub ignore_generics: bool,
     pub bound: Option<LitStr>,
     pub tag: Option<String>,
 }
@@ -37,6 +38,7 @@ impl StructAttr {
             rename,
             export,
             export_to,
+            ignore_generics,
             bound,
             tag,
         }: StructAttr,
@@ -45,6 +47,7 @@ impl StructAttr {
         self.rename_all = self.rename_all.take().or(rename_all);
         self.export_to = self.export_to.take().or(export_to);
         self.export = self.export || export;
+        self.ignore_generics = self.ignore_generics || ignore_generics;
         self.bound = self.bound.take().or(bound);
         self.tag = self.tag.take().or(tag);
     }
@@ -56,6 +59,7 @@ impl_parse! {
         "rename_all" => out.rename_all = Some(parse_assign_str(input).and_then(Inflection::try_from)?),
         "export" => out.export = true,
         "export_to" => out.export_to = Some(parse_assign_str(input)?),
+        "ignore_generics" => out.ignore_generics = true,
         "bound" => out.bound = Some(parse_assign_lit_str(input)?),
     }
 }
