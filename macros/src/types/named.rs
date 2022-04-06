@@ -36,7 +36,7 @@ pub(crate) fn named(
     }
 
     let fields = quote!(vec![#(#formatted_fields),*].join(" "));
-    
+
     let generic_args = if attr.ignore_generics {
         quote!("")
     } else {
@@ -57,6 +57,7 @@ pub(crate) fn named(
         export: attr.export,
         export_to: attr.export_to.clone(),
         bound: attr.bound.clone(),
+        ignore_generics: attr.ignore_generics,
     })
 }
 

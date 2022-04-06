@@ -21,5 +21,6 @@ pub(crate) fn unit(attr: &StructAttr, name: &str) -> Result<DerivedTS> {
         export: attr.export,
         export_to: attr.export_to.clone(),
         bound: attr.bound.clone(),
+        ignore_generics: attr.ignore_generics,
     })
 }

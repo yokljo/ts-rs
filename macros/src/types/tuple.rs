@@ -55,6 +55,7 @@ pub(crate) fn tuple(
         export: attr.export,
         export_to: attr.export_to.clone(),
         bound: attr.bound.clone(),
+        ignore_generics: attr.ignore_generics,
     })
 }
 

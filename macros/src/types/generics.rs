@@ -89,7 +89,14 @@ pub fn format_type(ty: &Type, dependencies: &mut Dependencies, generics: &Generi
                 .map(|ty| format_type(ty, dependencies, generics))
                 .collect::<Vec<_>>();
             let args = quote!(vec![#(#args),*]);
-            quote!(<#ty as ts_rs::TS>::name_with_type_args(#args))
+            
+            quote!(
+                if <#ty as ts_rs::TS>::ignore_generics() {
+                    <#ty as ts_rs::TS>::name()
+                } else {
+                    <#ty as ts_rs::TS>::name_with_type_args(#args)
+                }
+            )
         }
     }
 }

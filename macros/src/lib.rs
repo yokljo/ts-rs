@@ -26,6 +26,7 @@ struct DerivedTS {
     export: bool,
     export_to: Option<String>,
     bound: Option<LitStr>,
+    ignore_generics: bool,
 }
 
 impl DerivedTS {
@@ -69,6 +70,7 @@ impl DerivedTS {
             decl,
             inline_flattened,
             dependencies,
+            ignore_generics,
             ..
         } = self;
         let inline_flattened = inline_flattened
@@ -101,6 +103,9 @@ impl DerivedTS {
                 }
                 fn transparent() -> bool {
                     false
+                }
+                fn ignore_generics() -> bool {
+                    #ignore_generics
                 }
             }
 

@@ -279,6 +279,11 @@ pub trait TS: 'static {
     /// This is used for resolving imports when using the `export!` macro.
     fn transparent() -> bool;
 
+    /// `true` if generic arguments are not generated for this type even if they exist in Rust.
+    fn ignore_generics() -> bool {
+        false
+    }
+
     /// Manually export this type to a file.
     /// The output file can be specified by annotating the type with `#[ts(export_to = ".."]`.
     /// By default, the filename will be derived from the types name.
