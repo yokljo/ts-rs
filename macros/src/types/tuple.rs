@@ -28,7 +28,12 @@ pub(crate) fn tuple(
         format_field(&mut formatted_fields, &mut dependencies, field, generics)?;
     }
 
-    let generic_args = format_generics(&mut dependencies, generics);
+    let generic_args = if attr.ignore_generics {
+        quote!("")
+    } else {
+        format_generics(&mut dependencies, generics)
+    };
+
     Ok(DerivedTS {
         inline: quote! {
             format!(
