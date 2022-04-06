@@ -24,11 +24,20 @@ macro_rules! impl_parse {
             fn parse($input: syn::parse::ParseStream) -> syn::Result<Self> {
                 let mut $out = $i::default();
                 loop {
-                    let key: Ident = $input.call(syn::ext::IdentExt::parse_any)?;
-                    match &*key.to_string() {
-                        $($k => $e,)*
-                        #[allow(unreachable_patterns)]
-                        _ => syn_err!($input.span(); "unexpected attribute")
+                    let key: Result<Ident> = $input.call(syn::ext::IdentExt::parse_any);
+                    if let Ok(key) = key {
+                        match &*key.to_string() {
+                            $($k => $e,)*
+                            #[allow(unreachable_patterns)]
+                            _ => syn_err!($input.span(); "unexpected attribute")
+                        }
+                    } else {
+                        // This branch covers call-style attributes, such as `#[serde(bound(...))]`.
+                        let key: Ident = $input.call(syn::Ident::parse)?;
+                        match &*key.to_string() {
+                            #[allow(unreachable_patterns)]
+                            _ => syn_err!($input.span(); "unexpected attribute")
+                        }
                     }
 
                     match $input.is_empty() {
