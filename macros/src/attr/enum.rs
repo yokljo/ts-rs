@@ -95,6 +95,9 @@ impl_parse! {
         "rename_all" => out.0.rename_all = Some(parse_assign_inflection(input)?),
         "tag" => out.0.tag = Some(parse_assign_str(input)?),
         "content" => out.0.content = Some(parse_assign_str(input)?),
-        "untagged" => out.0.untagged = true
+        "untagged" => out.0.untagged = true,
+        "bound" => {
+            // Ignore this attribute, as it specifically affects serde generic bounds. There is a ts(bound) attribute for overriding TS generic bounds.
+        },
     }
 }

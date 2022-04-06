@@ -70,6 +70,9 @@ impl_parse! {
         "rename" => out.0.rename = Some(parse_assign_str(input)?),
         "rename_all" => out.0.rename_all = Some(parse_assign_str(input).and_then(Inflection::try_from)?),
         "tag" => out.0.tag = Some(parse_assign_str(input)?),
+        "bound" => {
+            // Ignore this attribute, as it specifically affects serde generic bounds. There is a ts(bound) attribute for overriding TS generic bounds.
+        },
         // parse #[serde(default)] to not emit a warning
         "default" => {
             use syn::Token;
