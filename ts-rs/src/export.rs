@@ -89,14 +89,16 @@ fn generate_imports<T: TS + ?Sized>(out: &mut String) -> Result<(), ExportError>
 
 /// Returns the required import path for importing `import` from the file `from`
 fn import_path(from: &Path, import: &Path) -> String {
-    let rel_path =
-        diff_paths(import, from.parent().unwrap()).expect("failed to calculate import path");
-    match rel_path.components().next() {
-        Some(Component::Normal(_)) => format!("./{}", rel_path.to_string_lossy()),
-        _ => rel_path.to_string_lossy().into(),
+    if let Some(rel_path) = diff_paths(import, from.parent().unwrap()) {
+        match rel_path.components().next() {
+            Some(Component::Normal(_)) => format!("./{}", rel_path.to_string_lossy()),
+            _ => rel_path.to_string_lossy().into(),
+        }
+        .trim_end_matches(".ts")
+        .to_owned()
+    } else {
+        panic!("failed to calculate import {import:?} from {from:?}");
     }
-    .trim_end_matches(".ts")
-    .to_owned()
 }
 
 // Construct a relative path from a provided base directory path to the provided path.
